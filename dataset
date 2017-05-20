@@ -1,0 +1,134 @@
+
+Analyzing the NYC Subway Dataset
+Section 1. Statistical Test
+1.1 Which statistical test did you use to analyse the NYC subway data? Did you use a one-tail or a two-tail P value? What is the null hypothesis? What is your p-critical value?
+The Mann-Whitney U test , 2 tailed is used to analyze the NYC subway data.The Mann-Whitney U test assumes 2 independent samples of ordinal (or interval) datatype. The turnstile dataset fulfills both conditions.
+The Mann-Whitney U does not assume the sample data is drawn from any particular known underlying distribution or that the samples are of equal size or variance.By comparing the number of turnstile entries with rain and without rain. A two-tail p-value was used with no assumptions made about the distributions of ridership on rainy and non-rainy days.
+The p-critical value used was 0.05, or 5%.
+1.2 Why is this statistical test applicable to the dataset? In particular, consider the assumptions that the test is making about the distribution of ridership in the two samples.
+The Mann-Whitney U is a non-parametric test which does not assume any particular distribution, as opposed to Welch’s t-test. Therefore the Mann-Whitney Utest is the best fit for the NYC subway data set, simply by appreciating the histogram of the data we can clearly see the data is non-normal.
+1.3 What results did you get from this statistical test? These should include the following numerical values: p-values, as well as the means for each of the two samples under test.
+Mean entries with rain: 1105.446 Mean entries without rain: 1090.279 U-statistic: 1924409167.0 p-value: 0.025
+The MWUtest returned a p-value of 0.025, so we reject the null hypothesis that both data sets are identical and have the same mean. In other words, both sample means are statistically different. 1.4 What is the significance and interpretation of these results?
+These results show that subway usage increases when it rains, in a statistically significant way. On average, it increases by 15 riders per hour. With p-value 0.025 one can conclude that with 95% confidence that the null hypothesis is false and that ridership is different with vs. without rain.
+
+Section 2. Linear Regression
+2.1 What approach did you use to compute the coefficients theta and produce prediction for ENTRIESn_hourly in your regression model?
+Gradient descent (as implemented in exercise 3.5) OLS using Statsmodels Or something different?
+Both gradient descent (GD) and OLS models where used to run linear regression on the NYC subway dataset. Both models look for linear relationships between the features and the predicted values or NYC subway rides.
+What features did you use in your model?
+In the GD model the features used were: rain, presipitation (precipi), hour of the day (Hour), mean temperature (meantempi) and dummy variables for individual station (UNIT). In the OLS model, the features used where: rain, mean temperature (meantempi) and dummy variables for stations (UNIT) and dummy variables for hours of day (Hour).
+2.2 What features (input variables) did you use in your model? Did you use any dummy variables as part of your features?
+I accepted the predefined dummy variable 'UNIT' and I also added another dummy variable
+'dayofweek'. Finally, I added 'Hour', 'meanpressurei', 'maxdewpti', 'rain' and 'fog' to the list of features.
+2.3 Why did you select these features in your model? We are looking for specific reasons that lead you to believe that the selected features will contribute to the predictive power of your model. ( reasons might be based on intuition. For example, response for fog might be: “Idecided to use fog because I thought that when it is very foggy outside people might decide to use the subway more often.”• Your reasons might also be based on data exploration and experimentation, for example: “I used feature X because as soon as I included it in my model, it drastically improved my R2 value.”)
+I accepted the predefined UNIT dummy variable because it provided the largest increase of the R2
+value (0.425) which I could find during my experimentation. Other groups of features did not show
+that strong impact on R2.
+As for the 'dayofweek' dummy, my intuition was that weather based decisions to use the subway may differ significantly on weekends compared to normal working days.
+In order to further boost my R2 I proceeded by searching for features with a broad variability in comparison to 'UNIT' and 'dayofweek' but this is easier said than done. So the method was rather
+trial and error. Finally, I chose 'Hour' and the weather-related features ' meanpressurei', 'maxdewpti', 'rain', and 'fog'. Why are these features appropriate?
+After mixing and matching various features, these were the most relevant and important features based on their explicatory power and statistical significance. I had a bias for choosing the simplest model possible, without loosing too much explicatory power or R^2.
+What is your model’s R2 (coefficients of determination) value?
+The R squared for the GD model is 0.461. The R squared for the OLS is 0.525.
+What does this R2 value mean for the goodness of fit for your regression model?
+The R squared for the OLS is 0.525 which means we can explain about 52.5% of the data variability with the model.
+2.4 What are the parameters (also known as "coefficients" or "weights") of the non-dummy features in your linear regression model?
+Starting the regression with alpha = 0.1 and num_iterations = 50 on the random subset provided, I
+obtained the following non-dummy coefficients:
+'Hour': 4.63757966e+02
+'meanpressurei': -2.64689006e+01
+'maxdewpti': -4.89940069e+01
+'rain': -1.27974911e+01
+'fog': 4.94588410e+01 2.5 What is your model’s R2 (coefficients of determination) value?
+R2 = 0.476546529828
+import numpy as np
+def compute_r_squared(data, predictions):
+'''
+Given a list of original data points, and also a list of predicted data points,
+this function will compute and return the coefficient of determination (R^2)
+for this data.
+'''
+nominator = np.square((data - predictions)).sum()
+denominator = np.square(data - data.mean()).sum()
+r_squared = 1.0 - (nominator/denominator)
+return r_squared
+2.6 What does this R2 value mean for the goodness of fit for your regression model? Do you think this linear model to predict ridership is appropriate for this dataset, given this R2 value?
+Let v1 be the variance of the residuals around the regression line and let v2 be the overall variance (in our case: the variance of turnstile entries). The following formula was used to compute R2:
+R2 = 1 – (v1/v2)
+Meaning1: R2 gives a measure of how well the regression line of a model fits the data. If v1=0 (the
+predicted values match the data perfectly), then R2=1. In the worst case v1=v2 (there is no
+relationship between the independent variables and the output variable) and therefore R2=0. Since an R2 of 0.48 falls approximately in the middle of [0,1], there could be worse fits, but also better ones, e.g. obtainable by just adding more and more regressors (at the cost of more complicated models).
+Meaning2: v1 is called „the unexplained variation“. Since v1 = v2*(1-R2) and given R2 as above,
+one can therefore conclude that the given model has explained around 0.48% of the overall
+variation of observed turnstile entries and left unexplained 0.52%.
+Appropriateness:
+Multiple regression assumes that the the residuals are normally distributed. One way to check this
+assumption is to plot the residuals. While a histogram of the residuals shows a long-legged Bell
+curve centered around 0 suggesting normality, I have chosen to do a „Residuals Vs Fits“ plot:
+Interpretation: The higher the output variable, the higher the residual error. This implies a pattern where the residuals should be randomly distributed about 0. Hence, the assumption of normality does not seem to be fulfilled. Further analysis is needed to check normality conclusively. So I'm not sure if the model can be called appropriate.
+
+Section 3. Visualization
+Please include two visualizations that show the relationships between two or more variables in the NYC subway data. You should feel free to implement something that we discussed in class (e.g., scatterplots, line plots, or histograms) or attempt to implement something more advanced if you'd like.
+One visualization should be two histograms of ENTRIESn_hourly for rainy days and non-rainy days histogram of entries by day histogram of entries by day
+One visualization can be more freeform, some suggestions are: Ridership by time-of-day or day-of-week How ridership varies by subway station Which stations have more exits or entries at different times of day histogram of entries by day histogram of entries by day
+In [20]:
+import numpy as np
+import pandas
+import matplotlib.pyplot as plt
+def entries_histogram(turnstile_weather):
+     fig = plt.figure(); ax = fig.add_subplot(1,1,1)
+     ax.set_xlim([0,4000])
+     ax.set_ylim([0,50000])
+     no_rain = list(turnstile_weather["ENTRIESn_hourly"][turnstile_weather["rain"] == 0])
+     ax.hist(no_rain,color='y',bins=np.arange(min(no_rain), max(no_rain) + 250, 250),label='no rain')
+     rain = list(turnstile_weather["ENTRIESn_hourly"][turnstile_weather["rain"] == 1])
+     ax.hist(rain,color='b',bins=np.arange(min(rain), max(rain) + 250, 250),label='rain')
+     ax.set_title('Comparison of Entries on Rainy and Non-Rainy Days')
+     ax.set_xlabel('Volume of Ridership (bin size = 250)')
+     ax.set_ylabel('Frequency')
+     ax.legend(loc='best')
+     return fig
+file =  r'turnstile_data_master_with_weather.csv'
+turnstile_weather = pandas.read_csv(file)
+entries_histogram(turnstile_weather)
+Out[20]:
+ 
+
+ 
+
+Note that the 'Entries_hourly' column contained the cumulative sum of the last 4 hours for a given turnstile unit. Each day was thus partitioned into 6 intervals. The histogram counts the number of occurrences of these entries per bin (binsize=250). Thus, there are more than 40k entries in the column smaller than 250 (lots of them equal to 0). This histogram might looks like it is concluding that there are far more entries during rainy days than during non-rainy days. it is not because there were twice as many non-rainy days (20) than rainy days (10) and the bar height ratios of both groups appear to be roughly constant, the above histogram is better interpreted by mentally dividing the absolute frequency of non-rainy days by 2, thus roughly equalling the absolute frequency of rainy days. Equivalently, a histogram of relative frequency would show that the difference between the two groups is small (by comparing the results of each class interval to the total number of entries). This is confirmed by the small difference between the average numbers mentioned in Section 1.3.
+The distribution of data in this case show that the data distribution does not appear to be normal which suggests to continue the investigation with non-parametric tools.
+In [19]:
+from pandas import *
+from ggplot import *
+
+filename = r'turnstile_data_master_with_weather.csv'
+with open(filename,'rb') as df:
+     df = pandas.read_csv(filename)
+     grouped = df['ENTRIESn_hourly'].groupby(df['Hour'])
+     result = grouped.agg(['mean'])
+     gg = ggplot(result.reset_index(), aes(x='Hour',y='mean')) + \
+     geom_point(stat = "identity") + geom_line(color='blue') +\
+     xlab("Hours of the Day") + xlim(-0.5,24.5) + ylim(0,3000) + ylab('Means')+\
+     ggtitle('''Average Number of N.Y. Subway Turnstile Entries per Hour of the Day (May 2011)''')
+     print(gg)
+
+C:\Users\Victor\Anaconda2\lib\site-packages\matplotlib\__init__.py:872: UserWarning: axes.color_cycle is deprecated and replaced with axes.prop_cycle; please use the latter.
+  warnings.warn(self.msg_depr % (key, alt_key))
+
+ 
+
+<ggplot: (19073983)>
+
+Like with other time granularities on the X-axis (month,week,day) the above line plot shows a specifc pattern. But in contrast to week or day, the 'hour'-plot is very problematic. The peak values at noon and 20:00 are somewhat surprising since one would expect rush hours to be peaks. This surprise can be explained by the cumulative way of counting entries displayed in the 'Entries_hourly' column, mentioned above. Thus, one can only guess where exactly within the 4 hour interval before noon and 20:00 respectively the real peaks are to be located (if any). Since this undetermined „backwards shift in time“ applies to all points of the line plot, the analytic value of the above plot can be considered low.
+
+From your analysis and interpretation of the data, do more people ride the NYC subway when it is raining versus when it is not raining?
+On average, between 15 and 100 more people ride the NYC subway on a rainy day compared to a non-rainy day. These numbers come from using simple mean comparison, and linear regressions with Gradient Descent and OLS. In the mean comparison, we see a difference of 15 entries per hour, while in the gradient descent model the theta for the rain variable was 104.5. Given that the rain variable is a boolean the interpretation of the theta is that when it rains (rain = 1), the model predicts on average 104.5 more people will ride the subway.
+What analyses lead you to this conclusion?
+The comparison of both means using the Mann-Whitney U-test gives us good reason to believe that there is a statistical significant difference between the two data distributions. Other hints also show up in the Gradient Descent and OLS models, where rain feature had a positive theta of 104.5 and 54.3 respectively.
+Section 5. Reflection
+Please discuss potential shortcomings of the dataset and the methods of your analysis.
+One of the possible shortcomings of the dataset is that there might be omitted variables like festivity or event dates, closed dates for maintenance, etc. Another important point to make is that in both the linear models a lot of dummy variables were used, which removes a lot of degrees of freedom and increases chances of multicollinearity. For example, I was unable to add three sets of dummy variables for hours of day, day of week and stations.
+
+References •Stanford Machine Learning Class •SciPy Documentation •Mann-Whitney U Test Wiki •GraphPad •Piazza posts statsmodels.regression.linear_model.OLS (http://statsmodels.sourceforge.net/devel/generated/statsmodels.regression.linear_model.OLS.html)
